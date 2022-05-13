@@ -166,6 +166,7 @@ pipeline {
               echo "Already pushed tagged image in dev deploy"
             } else {
                   echo "$GIT_HASH"
+                  sh("docker pull registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
                   qaImage = docker.tag ("registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH", "registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
                   docker.withRegistry(registryUri, registryCredentialsId){
                     qaImage.push()
