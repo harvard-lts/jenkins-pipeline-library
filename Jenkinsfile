@@ -225,26 +225,20 @@ pipeline {
    post {
         fixed {
             script {
-                if(env.BRANCH_NAME == "main" || env.BRANCH_NAME == "trial") {
                     // Specify your project channel here. Feel free to add/remove states that are relevant to your project (i.e. fixed, failure,...)
-                    slackSend channel: "#<project-channel>", color: "##77caed", message: "Build Fixed: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
-                }
+                    slackSend channel: "@jessi_jassal", color: "##77caed", message: "Build Fixed: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
             }
         }
         failure {
             script {
-                if(env.BRANCH_NAME == "main" || env.BRANCH_NAME == "trial") {
                     // Specify your project channel here. Feel free to add/remove states that are relevant to your project (i.e. fixed, failure,...)
-                    slackSend channel: "#<project-channel>", color: "danger", message: "Build Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
-                }
+                    slackSend channel: "@jessi_jassal", color: "danger", message: "Build Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
             }
         }
         success {
             script {
-                if(env.BRANCH_NAME == "main" || env.BRANCH_NAME == "trial") {
                     // Specify your project channel here. Feel free to add/remove states that are relevant to your project (i.e. fixed, failure,...)
-                    slackSend channel: "#<project-channel>", color: "good", message: "Build Succeeded: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
-                }
+                    slackSend channel: "@jessi_jassal", color: "good", message: "Build Succeeded: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
             }
         }
     }
