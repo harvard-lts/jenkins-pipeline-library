@@ -222,11 +222,6 @@ pipeline {
       }
     }
   }
-  stage('Slack Demo') {
-      steps {
-          echo "This is for a slack message demo"
-    }
-  }
    post {
         fixed {
             script {
