@@ -14,6 +14,7 @@ pipeline {
        }
       }
     }
+
     // trial is optional and only goes to dev
    stage('Build and Publish trial image') {
       when {
@@ -71,10 +72,10 @@ pipeline {
           script {
               sshagent(credentials : ['hgl_svcupd']) {
                 script{
-                  TESTS_PASSED = sh (script: "ssh -t -t ${env.DEV_SERVER} 'curl -k https://${env.CLOUD_DEV}:<itest-container-port>/apps/healthcheck'",
+                  TESTS_PASSED = sh (script: "ssh -t -t ${env.DEV_SERVER} 'curl -k https://${env.CLOUD_DEV}:<port>/apps/healthcheck'",
                   returnStdout: true).trim()
                   echo "${TESTS_PASSED}"
-                  if (!TESTS_PASSED.contains("\"num_failed\": 0")){
+                  if (!TESTS_PASSED.contains("\"num_failed\": 0") || !TESTS_PASSED_2.contains("\"num_failed\": 0")){
                     error "Dev trial integration tests did not pass"
                   } else {
                     echo "All test passed!"
@@ -141,10 +142,10 @@ pipeline {
               sshagent(credentials : ['hgl_svcupd']) {
                 script{
                   // TODO: Handle multiple curl commands more elegantly
-                  TESTS_PASSED = sh (script: "ssh -t -t ${env.DEV_SERVER} 'curl -k https://${env.CLOUD_DEV}:<itest-container-port>/apps/healthcheck'",
+                  TESTS_PASSED = sh (script: "ssh -t -t ${env.DEV_SERVER} 'curl -k https://${env.CLOUD_DEV}:<port>/apps/healthcheck'",
                   returnStdout: true).trim()
                   echo "${TESTS_PASSED}"
-                  if (!TESTS_PASSED.contains("\"num_failed\": 0")){
+                  if (!TESTS_PASSED.contains("\"num_failed\": 0") || !TESTS_PASSED_2.contains("\"num_failed\": 0")){
                     error "Dev main integration tests did not pass"
                   } else {
                     echo "All test passed!"
@@ -167,7 +168,8 @@ pipeline {
             } else {
                   echo "$GIT_HASH"
                   sh("docker pull registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
-                  qaImage = docker.tag ("registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH", "registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
+                  sh("docker tag registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
+                  qaImage = docker.image("registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
                   docker.withRegistry(registryUri, registryCredentialsId){
                     qaImage.push()
                     qaImage.push('latest')
@@ -206,10 +208,10 @@ pipeline {
           script {
               sshagent(credentials : ['qatest']) {
                 script{
-                  TESTS_PASSED = sh (script: "ssh -t -t ${env.QA_SERVER} 'curl -k https://${env.CLOUD_QA}:<itest-container-port>/apps/healthcheck'",
+                  TESTS_PASSED = sh (script: "ssh -t -t ${env.QA_SERVER} 'curl -k https://${env.CLOUD_QA}:<port>/apps/healthcheck'",
                   returnStdout: true).trim()
                   echo "${TESTS_PASSED}"
-                  if (!TESTS_PASSED.contains("\"num_failed\": 0")){
+                  if (!TESTS_PASSED.contains("\"num_failed\": 0") || !TESTS_PASSED_2.contains("\"num_failed\": 0")){
                     error "QA main integration tests did not pass"
                   } else {
                     echo "All test passed!"
@@ -219,7 +221,7 @@ pipeline {
           }
       }
     }
-   }
+  }
    post {
         fixed {
             script {
