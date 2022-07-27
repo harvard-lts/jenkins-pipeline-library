@@ -1,7 +1,7 @@
 # Jenkins Pipeline Library
 This is a shared library for resuable pipelines 
 
-## How to use library in your projcect pipeline
+## How to use library in your project pipeline
 
 ### Jenkinsfile
 ``` 
