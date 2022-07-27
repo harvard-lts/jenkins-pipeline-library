@@ -1,2 +1,2 @@
-# integration-tests-template
-This is a template project that contains template code for 
+# Jenkins Pipeline Library
+This is a shared library for resuable pipelines 
