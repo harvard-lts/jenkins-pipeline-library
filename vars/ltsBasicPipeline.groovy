@@ -1,4 +1,7 @@
-pipeline {
+#!/usr/bin/env groovy
+
+def call(String imageName, String stackName, String projName, String slackChannel, String registryCredentialsId = "${env.REGISTRY_ID}", String registryUri = 'https://registry.lts.harvard.edu') {
+  pipeline {
 
   agent any
   stages {
@@ -258,3 +261,6 @@ pipeline {
     registryUri = 'https://registry.lts.harvard.edu'
    }
  }
+}
+
+
