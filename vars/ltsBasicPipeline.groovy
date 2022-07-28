@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(String imageName, String stackName, String projName, String slackChannel, String registryCredentialsId = "${env.REGISTRY_ID}", String registryUri = 'https://registry.lts.harvard.edu') {
+def call(String imageName, String stackName, String projName, String slackChannel = "lts-jenkins-notifications", String registryCredentialsId = "${env.REGISTRY_ID}", String registryUri = 'https://registry.lts.harvard.edu') {
   pipeline {
 
   agent any

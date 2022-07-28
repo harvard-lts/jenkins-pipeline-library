@@ -12,6 +12,7 @@ This is a shared library for resuable pipelines
 // default values: 
 //  registryCredentialsId = "${env.REGISTRY_ID}"
 //  registryUri = 'https://registry.lts.harvard.edu'
+//  slackChannel = "lts-jenkins-notifications"
 ltsBasicPipeline "<imageName>" "<stackName>" "<projName>" "<slackChannel>" "<registryCredentialsId>" "<registryUri>" 
 ```
 
