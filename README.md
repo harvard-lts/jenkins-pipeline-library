@@ -13,7 +13,7 @@ This is a shared library for resuable pipelines
 //  registryCredentialsId = "${env.REGISTRY_ID}"
 //  registryUri = 'https://registry.lts.harvard.edu'
 //  slackChannel = "lts-jenkins-notifications"
-ltsBasicPipeline "<imageName>" "<stackName>" "<projName>" "<slackChannel>" "<registryCredentialsId>" "<registryUri>" 
+ltsBasicPipeline.call("<imageName>", "<stackName>", "<projName>", "<slackChannel>", "<registryCredentialsId>", "<registryUri>")
 ```
 
 NOTE: don't exclude the '_' at the end of the import line
