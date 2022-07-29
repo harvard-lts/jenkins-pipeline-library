@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(String imageName, String stackName, String projName, String slackChannel = "lts-jenkins-notifications", String registryCredentialsId = "${env.REGISTRY_ID}", String registryUri = 'https://registry.lts.harvard.edu') {
+def call(String imageName, String stackName, String projName, String slackChannel = "lts-jenkins-notifications", String intTestPort, List intTestEndpoints) {
   pipeline {
 
   agent any
@@ -71,18 +71,21 @@ def call(String imageName, String stackName, String projName, String slackChanne
           branch 'trial'
         }
       steps {
-          echo "Running integration tests on dev"
+          echo "Beginning integration tests step on dev"
           script {
               sshagent(credentials : ['hgl_svcupd']) {
                 script{
-                  TESTS_PASSED = sh (script: "ssh -t -t ${env.DEV_SERVER} 'curl -k https://${env.CLOUD_DEV}:<port>/apps/healthcheck'",
-                  returnStdout: true).trim()
-                  echo "${TESTS_PASSED}"
-                  if (!TESTS_PASSED.contains("\"num_failed\": 0") || !TESTS_PASSED_2.contains("\"num_failed\": 0")){
-                    error "Dev trial integration tests did not pass"
-                  } else {
-                    echo "All test passed!"
-                  }
+                    for(int i = 0; i < intTestEndpoints.size(); i++){
+                      String endpoint = intTestEndpoints.get(i)
+                      TESTS_PASSED = sh (script: "ssh -t -t ${env.DEV_SERVER} 'curl -k https://${env.CLOUD_DEV}:${intTestPort}/${endpoint}'",
+                      returnStdout: true).trim()
+                      echo "${TESTS_PASSED}"
+                      if (!TESTS_PASSED.contains("\"num_failed\": 0")){
+                        error "Dev trial integration tests did not pass for endpoint: ${endpoint}"
+                      } else {
+                        echo "All test passed for endpoint: ${endpoint}!"
+                      }
+                    }
                 }
               }
           }
@@ -140,18 +143,20 @@ def call(String imageName, String stackName, String projName, String slackChanne
           branch 'main'
         }
       steps {
-          echo "Running integration tests on dev"
+          echo "Beginning integration tests step on dev"
           script {
               sshagent(credentials : ['hgl_svcupd']) {
                 script{
-                  // TODO: Handle multiple curl commands more elegantly
-                  TESTS_PASSED = sh (script: "ssh -t -t ${env.DEV_SERVER} 'curl -k https://${env.CLOUD_DEV}:<port>/apps/healthcheck'",
-                  returnStdout: true).trim()
-                  echo "${TESTS_PASSED}"
-                  if (!TESTS_PASSED.contains("\"num_failed\": 0") || !TESTS_PASSED_2.contains("\"num_failed\": 0")){
-                    error "Dev main integration tests did not pass"
-                  } else {
-                    echo "All test passed!"
+                  for(int i = 0; i < intTestEndpoints.size(); i++){
+                      String endpoint = intTestEndpoints.get(i)
+                      TESTS_PASSED = sh (script: "ssh -t -t ${env.DEV_SERVER} 'curl -k https://${env.CLOUD_DEV}:${intTestPort}/${endpoint}'",
+                      returnStdout: true).trim()
+                      echo "${TESTS_PASSED}"
+                      if (!TESTS_PASSED.contains("\"num_failed\": 0")){
+                        error "Dev trial integration tests did not pass for endpoint: ${endpoint}"
+                      } else {
+                        echo "All test passed for endpoint: ${endpoint}!"
+                      }
                   }
                 }
               }
@@ -207,18 +212,21 @@ def call(String imageName, String stackName, String projName, String slackChanne
           branch 'main'
         }
       steps {
-          echo "Running integration tests on QA"
+          echo "Beginning integration tests step on QA"
           script {
               sshagent(credentials : ['qatest']) {
                 script{
-                  TESTS_PASSED = sh (script: "ssh -t -t ${env.QA_SERVER} 'curl -k https://${env.CLOUD_QA}:<port>/apps/healthcheck'",
-                  returnStdout: true).trim()
-                  echo "${TESTS_PASSED}"
-                  if (!TESTS_PASSED.contains("\"num_failed\": 0") || !TESTS_PASSED_2.contains("\"num_failed\": 0")){
-                    error "QA main integration tests did not pass"
-                  } else {
-                    echo "All test passed!"
-                  }
+                    for(int i = 0; i < intTestEndpoints.size(); i++){
+                      String endpoint = intTestEndpoints.get(i)
+                      TESTS_PASSED = sh (script: "ssh -t -t ${env.QA_SERVER} 'curl -k https://${env.CLOUD_QA}:${intTestPort}/${endpoint}'",
+                      returnStdout: true).trim()
+                      echo "${TESTS_PASSED}"
+                      if (!TESTS_PASSED.contains("\"num_failed\": 0")){
+                        error "Dev trial integration tests did not pass for endpoint: ${endpoint}"
+                      } else {
+                        echo "All test passed for endpoint: ${endpoint}!"
+                      }
+                    }
                 }
               }
           }
@@ -262,5 +270,4 @@ def call(String imageName, String stackName, String projName, String slackChanne
    }
  }
 }
-
 
