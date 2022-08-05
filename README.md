@@ -14,7 +14,7 @@ This is a shared library for resuable pipelines
 // default values: slackChannel = "lts-jenkins-notifications"
 
 def endpoints = []
-ltsBasicPipeline.call("<imageName>", "<stackName>", "<projName>", "<slackChannel>", "<intTestPort>", endpoints) 
+ltsBasicPipeline.call("<imageName>", "<stackName>", "<projName>", "<intTestPort>", endpoints, "<slackChannel>") 
 ```
 
 NOTE: don't exclude the '_' at the end of the import line
