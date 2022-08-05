@@ -1,15 +1,16 @@
 #!/usr/bin/env groovy
 
 def call(String imageName, String stackName, String projName, String intTestPort, List intTestEndpoints, String slackChannel = "lts-jenkins-notifications") {
+
   pipeline {
 
   agent any
   stages {
     stage('Configure') {
-      when { anyOf { branch 'main'; branch 'trial' } }
+      when { anyOf { branch 'main'; branch 'trial'; buildingTag() } }
       steps {
         script {
-          GIT_TAG = sh(returnStdout: true, script: "git tag | head -1").trim()
+          GIT_TAG = env.BRANCH_NAME
           echo "${GIT_TAG}"
           echo "$GIT_TAG"
           GIT_HASH = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
@@ -17,31 +18,40 @@ def call(String imageName, String stackName, String projName, String intTestPort
        }
       }
     }
-
+    
+    stage('Publish Prod Image'){
+      when {
+          buildingTag()
+      }
+      steps {
+        script {
+          echo "$GIT_HASH"
+          echo "$GIT_TAG"
+          sh("docker pull registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
+          sh("docker tag registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH registry.lts.harvard.edu/lts/${imageName}:$GIT_TAG")
+          prodImage = docker.image("registry.lts.harvard.edu/lts/${imageName}:$GIT_TAG")
+          docker.withRegistry(registryUri, registryCredentialsId){
+            prodImage.push()
+          }
+        }
+      }
+    }
     // trial is optional and only goes to dev
    stage('Build and Publish trial image') {
       when {
-            branch 'trial'
-        }
+          branch 'trial';
+      }
       steps {
         echo 'Building and Pushing docker image to the registry...'
         script {
-            if (GIT_TAG != "") {
-              echo "$GIT_TAG"
-              def customImage = docker.build("registry.lts.harvard.edu/lts/${imageName}:$GIT_TAG")
-              docker.withRegistry(registryUri, registryCredentialsId){
-                customImage.push()
-              }
-            } else {
-                  echo "$GIT_HASH"
-                  def devImage = docker.build("registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
-                  docker.withRegistry(registryUri, registryCredentialsId){
-                    // push the dev with hash image
-                    devImage.push()
-                    // then tag with latest
-                    devImage.push('latest')
-                }
-              }
+            echo "$GIT_HASH"
+            def devImage = docker.build("registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
+            docker.withRegistry(registryUri, registryCredentialsId){
+              // push the dev with hash image
+              devImage.push()
+              // then tag with latest
+              devImage.push('latest')
+            }
         }
       }
    }
@@ -52,17 +62,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Deploying to dev"
           script {
-              if (GIT_TAG != "") {
-                  echo "$GIT_TAG"
-                  sshagent(credentials : ['hgl_svcupd']) {
-                      sh "ssh -t -t ${env.DEV_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
-                  }
-              } else {
-                      echo "$GIT_HASH"
-                      sshagent(credentials : ['hgl_svcupd']) {
-                      sh "ssh -t -t ${env.DEV_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
-                  }
-              }
+            echo "$GIT_HASH"
+            sshagent(credentials : ['hgl_svcupd']) {
+            sh "ssh -t -t ${env.DEV_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
+            }
           }
       }
     }
@@ -98,22 +101,14 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
         echo 'Building and Pushing docker image to the registry...'
         script {
-            if (GIT_TAG != "") {
-              echo "$GIT_TAG"
-              def customImage = docker.build("registry.lts.harvard.edu/lts/${imageName}:$GIT_TAG")
-              docker.withRegistry(registryUri, registryCredentialsId){
-                customImage.push()
-              }
-            } else {
-                  echo "$GIT_HASH"
-                  def devImage = docker.build("registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
-                  docker.withRegistry(registryUri, registryCredentialsId){
-                    // push the dev with hash image
-                    devImage.push()
-                    // then tag with latest
-                    devImage.push('latest')
-                }
-              }
+            echo "$GIT_HASH"
+            def devImage = docker.build("registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
+            docker.withRegistry(registryUri, registryCredentialsId){
+              // push the dev with hash image
+              devImage.push()
+              // then tag with latest
+              devImage.push('latest')
+            }
         }
       }
     }
@@ -124,16 +119,9 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Deploying to dev"
           script {
-              if (GIT_TAG != "") {
-                  echo "$GIT_TAG"
-                  sshagent(credentials : ['hgl_svcupd']) {
-                      sh "ssh -t -t ${env.DEV_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
-                  }
-              } else {
-                      echo "$GIT_HASH"
-                      sshagent(credentials : ['hgl_svcupd']) {
-                      sh "ssh -t -t ${env.DEV_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
-                  }
+              echo "$GIT_HASH"
+              sshagent(credentials : ['hgl_svcupd']) {
+              sh "ssh -t -t ${env.DEV_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
               }
           }
       }
@@ -171,21 +159,18 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo 'Pushing docker image to the registry...'
         echo "$GIT_TAG"
         script {
-            if (GIT_TAG != "") {
-              echo "Already pushed tagged image in dev deploy"
-            } else {
-                  echo "$GIT_HASH"
-                  sh("docker pull registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
-                  sh("docker tag registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
-                  qaImage = docker.image("registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
-                  docker.withRegistry(registryUri, registryCredentialsId){
-                    qaImage.push()
-                    qaImage.push('latest')
-                }
+              echo "$GIT_HASH"
+              sh("docker pull registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
+              sh("docker tag registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
+              qaImage = docker.image("registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
+              docker.withRegistry(registryUri, registryCredentialsId){
+                qaImage.push()
+                qaImage.push('latest')
             }
         }
       }
     }
+
     stage('MainQADeploy') {
       when {
           branch 'main'
@@ -193,17 +178,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Deploying to qa"
           script {
-              if (GIT_TAG != "") {
-                  echo "$GIT_TAG"
-                  sshagent(credentials : ['qatest']) {
-                      sh "ssh -t -t ${env.QA_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
-                  }
-              } else {
-                      echo "$GIT_HASH"
-                      sshagent(credentials : ['qatest']) {
-                      sh "ssh -t -t ${env.QA_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
-                  }
-              }
+            echo "$GIT_HASH"
+            sshagent(credentials : ['qatest']) {
+            sh "ssh -t -t ${env.QA_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
+            }
           }
       }
     }
@@ -270,4 +248,3 @@ def call(String imageName, String stackName, String projName, String intTestPort
    }
  }
 }
-
