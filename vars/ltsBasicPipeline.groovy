@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(String imageName, String stackName, String projName, String slackChannel = "lts-jenkins-notifications", String intTestPort, List intTestEndpoints) {
+def call(String imageName, String stackName, String projName, String intTestPort, List intTestEndpoints, String slackChannel = "lts-jenkins-notifications") {
   pipeline {
 
   agent any
