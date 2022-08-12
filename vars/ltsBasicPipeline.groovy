@@ -11,7 +11,6 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
         script {
           GIT_TAG = env.BRANCH_NAME
-          echo "${GIT_TAG}"
           echo "$GIT_TAG"
           GIT_HASH = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
           echo "$GIT_HASH"
@@ -39,7 +38,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
     // trial is optional and only goes to dev
    stage('Build and Publish trial image') {
       when {
+        allOf {
           branch 'trial';
+          not { buildingTag() }
+        }
       }
       steps {
         echo 'Building and Pushing docker image to the registry...'
@@ -57,7 +59,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
    }
     stage('TrialDevDeploy') {
       when {
-          branch 'trial'
+          allOf {
+            branch 'trial';
+            not { buildingTag() }
+          }
         }
       steps {
           echo "Deploying to dev"
@@ -71,7 +76,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
     }
     stage('TrialDevIntegrationTest') {
       when {
-          branch 'trial'
+          allOf {
+            branch 'trial';
+            not { buildingTag() }
+          }
         }
       steps {
           echo "Beginning integration tests step on dev"
@@ -96,7 +104,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
     }
    stage('Build and Publish dev image') {
       when {
-            branch 'main'
+          allOf {
+            branch 'main';
+            not { buildingTag() }
+          }
         }
       steps {
         echo 'Building and Pushing docker image to the registry...'
@@ -114,7 +125,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
     }
     stage('MainDevDeploy') {
       when {
-          branch 'main'
+          allOf {
+            branch 'main';
+            not { buildingTag() }
+          }
         }
       steps {
           echo "Deploying to dev"
@@ -128,7 +142,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
     }
     stage('MainDevIntegrationTest') {
       when {
-          branch 'main'
+          allOf {
+            branch 'main';
+            not { buildingTag() }
+          }
         }
       steps {
           echo "Beginning integration tests step on dev"
@@ -153,7 +170,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
     }
     stage('Publish main qa image') {
       when {
-            branch 'main'
+           allOf {
+            branch 'main';
+            not { buildingTag() }
+          }
         }
       steps {
         echo 'Pushing docker image to the registry...'
@@ -173,7 +193,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
 
     stage('MainQADeploy') {
       when {
-          branch 'main'
+          allOf {
+            branch 'main';
+            not { buildingTag() }
+          }
         }
       steps {
           echo "Deploying to qa"
@@ -187,7 +210,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
     }
     stage('MainQAIntegrationTest') {
       when {
-          branch 'main'
+          allOf {
+            branch 'main';
+            not { buildingTag() }
+          }
         }
       steps {
           echo "Beginning integration tests step on QA"
