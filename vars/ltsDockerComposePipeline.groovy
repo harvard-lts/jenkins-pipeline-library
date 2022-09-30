@@ -12,7 +12,8 @@ def call(List imageNames, String stackName, String projName, String slackChannel
             }
           }
         }
-        environment {
+      }
+      environment {
             imageNames = []
             stackName = ''
             // projName is the directory name for the project on the servers for it's docker/config files
@@ -20,7 +21,6 @@ def call(List imageNames, String stackName, String projName, String slackChannel
             slackChannel=''
             registryCredentialsId = "${env.REGISTRY_ID}"
             registryUri = 'https://registry.lts.harvard.edu'
-        }
       }
     }
 }
