@@ -8,7 +8,10 @@ def call(List imageNames, String stackName, String projName, String slackChannel
           when { anyOf { branch 'main'; branch 'trial' } }
           steps {
             script {
-              config_script()
+                GIT_TAG = sh(returnStdout: true, script: "git tag | head -1").trim()
+                echo "$GIT_TAG"
+                GIT_HASH = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
+                echo "$GIT_HASH"
             }
           }
         }
@@ -23,11 +26,4 @@ def call(List imageNames, String stackName, String projName, String slackChannel
             registryUri = 'https://registry.lts.harvard.edu'
       }
     }
-}
-
-def config_script(){
-    GIT_TAG = sh(returnStdout: true, script: "git tag | head -1").trim()
-    echo "$GIT_TAG"
-    GIT_HASH = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
-    echo "$GIT_HASH"
 }
