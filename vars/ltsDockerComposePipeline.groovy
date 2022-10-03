@@ -48,8 +48,8 @@ def call(String imageName, String stackName, String projName, String intTestPort
         script {
             echo "$GIT_HASH"
             docker.withRegistry(registryUri, registryCredentialsId) {
-              sh("docker-compose -f docker-compose-jenkins.yml build --no-cache --build-arg GIT_HASH=$GIT_HASH")
-              sh("docker-compose -f docker-compose-jenkins.yml push")
+              sh("GIT_HASH=$GIT_HASH docker-compose -f docker-compose-jenkins.yml build --no-cache")
+              sh("GIT_HASH=$GIT_HASH docker-compose -f docker-compose-jenkins.yml push")
             }
         }
       }
