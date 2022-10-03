@@ -28,6 +28,7 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
         script {
           echo "$GIT_HASH"
           echo "$GIT_TAG"
+          utilsTest.test("Hello World!")
           for(int i = 0; i < imageNames.size(); i++){
               String imageName = imageNames.get(i)
               sh("docker pull registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
@@ -266,7 +267,6 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
         }
     }
    environment {
-    //imageNames = []
     stackName = ''
     // projName is the directory name for the project on the servers for it's docker/config files
     projName = ''
