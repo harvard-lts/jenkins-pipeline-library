@@ -28,7 +28,6 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
         script {
           echo "$GIT_HASH"
           echo "$GIT_TAG"
-          utilsTest.test("Hello World!")
           for(int i = 0; i < imageNames.size(); i++){
               String imageName = imageNames.get(i)
               sh("docker pull registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
@@ -53,6 +52,7 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
         echo 'Building and Pushing docker image to the registry with docker-compose-jenkins.yml...'
         script {
             echo "$GIT_HASH"
+            utilsTest.test("Hello World!")
             docker.withRegistry(registryUri, registryCredentialsId) {
               sh("GIT_HASH=$GIT_HASH docker-compose -f docker-compose-jenkins.yml build --no-cache")
               sh("GIT_HASH=$GIT_HASH docker-compose -f docker-compose-jenkins.yml push")
