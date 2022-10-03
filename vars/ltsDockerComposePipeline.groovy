@@ -14,7 +14,7 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
           echo "$GIT_TAG"
           GIT_HASH = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
           echo "$GIT_HASH"
-          def utilsTest = new org.utils.buildUtils()
+          utilsTest = new org.utils.buildUtils()
           utilsTest.test("Hello World!")
        }
       }
