@@ -44,15 +44,12 @@ def call(String imageName, String stackName, String projName, String intTestPort
         }
       }
       steps {
-        echo 'Building and Pushing docker image to the registry...'
+        echo 'Building and Pushing docker image to the registry with docker-compose-jenkins.yml...'
         script {
             echo "$GIT_HASH"
-            def devImage = docker.build("registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
-            docker.withRegistry(registryUri, registryCredentialsId){
-              // push the dev with hash image
-              devImage.push()
-              // then tag with latest
-              devImage.push('latest')
+            docker.withRegistry(registryUri, registryCredentialsId) {
+              sh("docker-compose -f docker-compose-jenkins.yml build --no-cache")
+              sh("docker-compose -f docker-compose-jenkins.yml push")
             }
         }
       }
