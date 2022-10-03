@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(String imageName, String stackName, String projName, String intTestPort, List intTestEndpoints, String slackChannel = "lts-jenkins-notifications") {
+def call(List imageNames, String stackName, String projName, String intTestPort, List intTestEndpoints, String slackChannel = "lts-jenkins-notifications") {
 
   pipeline {
 
@@ -26,11 +26,14 @@ def call(String imageName, String stackName, String projName, String intTestPort
         script {
           echo "$GIT_HASH"
           echo "$GIT_TAG"
-          sh("docker pull registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
-          sh("docker tag registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH registry.lts.harvard.edu/lts/${imageName}:$GIT_TAG")
-          prodImage = docker.image("registry.lts.harvard.edu/lts/${imageName}:$GIT_TAG")
-          docker.withRegistry(registryUri, registryCredentialsId){
-            prodImage.push()
+          for(int i = 0; i < imageNames.size(); i++){
+              String imageName = imageNames.get(i)
+              sh("docker pull registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
+              sh("docker tag registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH registry.lts.harvard.edu/lts/${imageName}:$GIT_TAG")
+              prodImage = docker.image("registry.lts.harvard.edu/lts/${imageName}:$GIT_TAG")
+              docker.withRegistry(registryUri, registryCredentialsId){
+                prodImage.push()
+              }
           }
         }
       }
@@ -110,12 +113,9 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo 'Building and Pushing docker image to the registry...'
         script {
             echo "$GIT_HASH"
-            def devImage = docker.build("registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
-            docker.withRegistry(registryUri, registryCredentialsId){
-              // push the dev with hash image
-              devImage.push()
-              // then tag with latest
-              devImage.push('latest')
+            docker.withRegistry(registryUri, registryCredentialsId) {
+              sh("GIT_HASH=$GIT_HASH docker-compose -f docker-compose-jenkins.yml build --no-cache")
+              sh("GIT_HASH=$GIT_HASH docker-compose -f docker-compose-jenkins.yml push")
             }
         }
       }
@@ -177,13 +177,16 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo "$GIT_TAG"
         script {
               echo "$GIT_HASH"
-              sh("docker pull registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
-              sh("docker tag registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
-              qaImage = docker.image("registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
-              docker.withRegistry(registryUri, registryCredentialsId){
-                qaImage.push()
-                qaImage.push('latest')
-            }
+              for(int i = 0; i < imageNames.size(); i++){
+                  String imageName = imageNames.get(i)
+                  sh("docker pull registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
+                  sh("docker tag registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
+                  qaImage = docker.image("registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
+                  docker.withRegistry(registryUri, registryCredentialsId){
+                    qaImage.push()
+                    qaImage.push('latest')
+                  }
+              }
         }
       }
     }
@@ -261,7 +264,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         }
     }
    environment {
-    imageName = ''
+    imageNames = []
     stackName = ''
     // projName is the directory name for the project on the servers for it's docker/config files
     projName = ''
