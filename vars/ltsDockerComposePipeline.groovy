@@ -266,7 +266,7 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
         }
     }
    environment {
-    imageNames = []
+    //imageNames = []
     stackName = ''
     // projName is the directory name for the project on the servers for it's docker/config files
     projName = ''
