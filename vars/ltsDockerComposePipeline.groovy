@@ -14,8 +14,7 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
           echo "$GIT_TAG"
           GIT_HASH = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
           echo "$GIT_HASH"
-          utilsTest = new org.utils.buildUtils()
-          utilsTest.test("Hello World!")
+          buildUtils = new org.utils.buildUtils()
        }
       }
     }
@@ -51,12 +50,13 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
       steps {
         echo 'Building and Pushing docker image to the registry with docker-compose-jenkins.yml...'
         script {
-            echo "$GIT_HASH"
-            utilsTest.test("Hello World!")
-            docker.withRegistry(registryUri, registryCredentialsId) {
-              sh("GIT_HASH=$GIT_HASH docker-compose -f docker-compose-jenkins.yml build --no-cache")
-              sh("GIT_HASH=$GIT_HASH docker-compose -f docker-compose-jenkins.yml push")
-            }
+             echo "$GIT_HASH"
+//             utilsTest.test("Hello World!")
+//             docker.withRegistry(registryUri, registryCredentialsId) {
+//               sh("GIT_HASH=$GIT_HASH docker-compose -f docker-compose-jenkins.yml build --no-cache")
+//               sh("GIT_HASH=$GIT_HASH docker-compose -f docker-compose-jenkins.yml push")
+//             }
+            buildUtils.devDockerComposeBuild(GIT_HASH)
         }
       }
    }
