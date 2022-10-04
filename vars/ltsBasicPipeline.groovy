@@ -43,7 +43,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo 'Building and Pushing docker image to the registry...'
         script {
             echo "$GIT_HASH"
-            buildUtils.basicImageBuild(GIT_HASH, "dev")
+            buildUtils.basicImageBuild(imageName, GIT_HASH, "dev")
         }
       }
    }
@@ -89,7 +89,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo 'Building and Pushing docker image to the registry...'
         script {
             echo "$GIT_HASH"
-            buildUtils.basicImageBuild(GIT_HASH, "dev")
+            buildUtils.basicImageBuild(imageName, GIT_HASH, "dev")
         }
       }
     }
@@ -136,7 +136,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo "$GIT_TAG"
         script {
               echo "$GIT_HASH"
-              buildUtils.basicImageBuild(GIT_HASH, "qa")
+              buildUtils.basicImageBuild(imageName, GIT_HASH, "qa")
         }
       }
     }
