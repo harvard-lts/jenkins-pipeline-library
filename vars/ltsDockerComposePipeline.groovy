@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(String imageName, String stackName, String projName, String intTestPort, List intTestEndpoints, String slackChannel = "lts-jenkins-notifications") {
+def call(List imageNames, String stackName, String projName, String intTestPort, List intTestEndpoints, String slackChannel = "lts-jenkins-notifications") {
 
   pipeline {
 
@@ -18,7 +18,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
        }
       }
     }
-    
+
     stage('Publish Prod Image'){
       when {
           buildingTag()
@@ -27,7 +27,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
         script {
           echo "$GIT_HASH"
           echo "$GIT_TAG"
-          buildUtils.publishProdImage(imageName, GIT_HASH, GIT_TAG)
+          for(int i = 0; i < imageNames.size(); i++){
+              String imageName = imageNames.get(i)
+              buildUtils.publishProdImage(imageName, GIT_HASH, GIT_TAG)
+          }
         }
       }
     }
@@ -40,10 +43,10 @@ def call(String imageName, String stackName, String projName, String intTestPort
         }
       }
       steps {
-        echo 'Building and Pushing docker image to the registry...'
+        echo 'Building and Pushing docker image to the registry with docker-compose-jenkins.yml...'
         script {
             echo "$GIT_HASH"
-            buildUtils.basicImageBuild(imageName, GIT_HASH, "dev")
+            buildUtils.devDockerComposeBuild(GIT_HASH)
         }
       }
    }
@@ -89,7 +92,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo 'Building and Pushing docker image to the registry...'
         script {
             echo "$GIT_HASH"
-            buildUtils.basicImageBuild(imageName, GIT_HASH, "dev")
+            buildUtils.devDockerComposeBuild(GIT_HASH)
         }
       }
     }
@@ -135,8 +138,11 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo 'Pushing docker image to the registry...'
         echo "$GIT_TAG"
         script {
-              echo "$GIT_HASH"
-              buildUtils.basicImageBuild(imageName, GIT_HASH, "qa")
+          echo "$GIT_HASH"
+          for(int i = 0; i < imageNames.size(); i++){
+              String imageName = imageNames.get(i)
+              buildUtils.publishQAImage(imageName, GIT_HASH)
+          }
         }
       }
     }
@@ -168,7 +174,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Beginning integration tests step on QA"
           script {
-              buildUtils.runIntegrationTests(intTestEndpoints, env.QA_SERVER, env.CLOUD_QA, intTestPort)
+            buildUtils.runIntegrationTests(intTestEndpoints, env.QA_SERVER, env.CLOUD_QA, intTestPort)
           }
       }
     }
@@ -200,7 +206,6 @@ def call(String imageName, String stackName, String projName, String intTestPort
         }
     }
    environment {
-    imageName = ''
     stackName = ''
     // projName is the directory name for the project on the servers for it's docker/config files
     projName = ''
