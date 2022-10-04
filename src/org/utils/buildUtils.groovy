@@ -8,8 +8,8 @@ def devDockerComposeBuild(git_hash) {
     }
 }
 
-def basicImageBuild(git_hash, environment) {
-    def image = docker.build("registry.lts.harvard.edu/lts/${imageName}-${environment}:$GIT_HASH")
+def basicImageBuild(image_name, git_hash, environment) {
+    def image = docker.build("registry.lts.harvard.edu/lts/${image_name}-${environment}:$GIT_HASH")
     docker.withRegistry(registryUri, registryCredentialsId){
       // push the image with hash image
       image.push()
