@@ -14,6 +14,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
           echo "$GIT_TAG"
           GIT_HASH = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
           echo "$GIT_HASH"
+          buildUtils = new org.utils.buildUtils()
        }
       }
     }
@@ -26,12 +27,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         script {
           echo "$GIT_HASH"
           echo "$GIT_TAG"
-          sh("docker pull registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
-          sh("docker tag registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH registry.lts.harvard.edu/lts/${imageName}:$GIT_TAG")
-          prodImage = docker.image("registry.lts.harvard.edu/lts/${imageName}:$GIT_TAG")
-          docker.withRegistry(registryUri, registryCredentialsId){
-            prodImage.push()
-          }
+          buildUtils.publishProdImage(imageName, GIT_HASH, GIT_TAG)
         }
       }
     }
@@ -47,13 +43,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo 'Building and Pushing docker image to the registry...'
         script {
             echo "$GIT_HASH"
-            def devImage = docker.build("registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
-            docker.withRegistry(registryUri, registryCredentialsId){
-              // push the dev with hash image
-              devImage.push()
-              // then tag with latest
-              devImage.push('latest')
-            }
+            buildUtils.basicImageBuild(GIT_HASH, "dev")
         }
       }
    }
@@ -84,21 +74,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Beginning integration tests step on dev"
           script {
-              sshagent(credentials : ['hgl_svcupd']) {
-                script{
-                    for(int i = 0; i < intTestEndpoints.size(); i++){
-                      String endpoint = intTestEndpoints.get(i)
-                      TESTS_PASSED = sh (script: "ssh -t -t ${env.DEV_SERVER} 'curl -k https://${env.CLOUD_DEV}:${intTestPort}/${endpoint}'",
-                      returnStdout: true).trim()
-                      echo "${TESTS_PASSED}"
-                      if (!TESTS_PASSED.contains("\"num_failed\": 0")){
-                        error "Dev trial integration tests did not pass for endpoint: ${endpoint}"
-                      } else {
-                        echo "All test passed for endpoint: ${endpoint}!"
-                      }
-                    }
-                }
-              }
+              buildUtils.runIntegrationTests(intTestEndpoints, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
           }
       }
     }
@@ -113,13 +89,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo 'Building and Pushing docker image to the registry...'
         script {
             echo "$GIT_HASH"
-            def devImage = docker.build("registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
-            docker.withRegistry(registryUri, registryCredentialsId){
-              // push the dev with hash image
-              devImage.push()
-              // then tag with latest
-              devImage.push('latest')
-            }
+            buildUtils.basicImageBuild(GIT_HASH, "dev")
         }
       }
     }
@@ -150,21 +120,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Beginning integration tests step on dev"
           script {
-              sshagent(credentials : ['hgl_svcupd']) {
-                script{
-                  for(int i = 0; i < intTestEndpoints.size(); i++){
-                      String endpoint = intTestEndpoints.get(i)
-                      TESTS_PASSED = sh (script: "ssh -t -t ${env.DEV_SERVER} 'curl -k https://${env.CLOUD_DEV}:${intTestPort}/${endpoint}'",
-                      returnStdout: true).trim()
-                      echo "${TESTS_PASSED}"
-                      if (!TESTS_PASSED.contains("\"num_failed\": 0")){
-                        error "Dev trial integration tests did not pass for endpoint: ${endpoint}"
-                      } else {
-                        echo "All test passed for endpoint: ${endpoint}!"
-                      }
-                  }
-                }
-              }
+              buildUtils.runIntegrationTests(intTestEndpoints, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
           }
       }
     }
@@ -180,13 +136,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo "$GIT_TAG"
         script {
               echo "$GIT_HASH"
-              sh("docker pull registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH")
-              sh("docker tag registry.lts.harvard.edu/lts/${imageName}-dev:$GIT_HASH registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
-              qaImage = docker.image("registry.lts.harvard.edu/lts/${imageName}-qa:$GIT_HASH")
-              docker.withRegistry(registryUri, registryCredentialsId){
-                qaImage.push()
-                qaImage.push('latest')
-            }
+              buildUtils.basicImageBuild(GIT_HASH, "qa")
         }
       }
     }
@@ -218,21 +168,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Beginning integration tests step on QA"
           script {
-              sshagent(credentials : ['qatest']) {
-                script{
-                    for(int i = 0; i < intTestEndpoints.size(); i++){
-                      String endpoint = intTestEndpoints.get(i)
-                      TESTS_PASSED = sh (script: "ssh -t -t ${env.QA_SERVER} 'curl -k https://${env.CLOUD_QA}:${intTestPort}/${endpoint}'",
-                      returnStdout: true).trim()
-                      echo "${TESTS_PASSED}"
-                      if (!TESTS_PASSED.contains("\"num_failed\": 0")){
-                        error "Dev trial integration tests did not pass for endpoint: ${endpoint}"
-                      } else {
-                        echo "All test passed for endpoint: ${endpoint}!"
-                      }
-                    }
-                }
-              }
+              buildUtils.runIntegrationTests(intTestEndpoints, env.QA_SERVER, env.CLOUD_QA, intTestPort)
           }
       }
     }
