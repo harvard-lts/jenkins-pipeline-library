@@ -136,7 +136,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         echo "$GIT_TAG"
         script {
               echo "$GIT_HASH"
-              publishQAImage(imageName, GIT_HASH)
+              buildUtils.publishQAImage(imageName, GIT_HASH)
         }
       }
     }
