@@ -8,6 +8,14 @@ def devDockerComposeBuild(git_hash) {
     }
 }
 
+def devDockerComposeTagLatest(image_name, git_hash) {
+    sh("docker pull registry.lts.harvard.edu/lts/${image_name}-dev:${git_hash}")
+    devImage = docker.image("registry.lts.harvard.edu/lts/${image_name}-dev:${git_hash}")
+    docker.withRegistry(registryUri, registryCredentialsId){
+        devImage.push('latest')
+    }
+}
+
 def basicImageBuild(image_name, git_hash, environment) {
     def image = docker.build("registry.lts.harvard.edu/lts/${image_name}-${environment}:${git_hash}")
     docker.withRegistry(registryUri, registryCredentialsId){
