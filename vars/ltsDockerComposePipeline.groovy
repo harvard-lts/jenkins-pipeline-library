@@ -47,6 +47,10 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
         script {
             echo "$GIT_HASH"
             buildUtils.devDockerComposeBuild(GIT_HASH)
+            for(int i = 0; i < imageNames.size(); i++){
+              String imageName = imageNames.get(i)
+              buildUtils.devDockerComposeTagLatest(imageName, GIT_HASH)
+            }
         }
       }
    }
@@ -93,6 +97,10 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
         script {
             echo "$GIT_HASH"
             buildUtils.devDockerComposeBuild(GIT_HASH)
+            for(int i = 0; i < imageNames.size(); i++){
+              String imageName = imageNames.get(i)
+              buildUtils.devDockerComposeTagLatest(imageName, GIT_HASH)
+            }
         }
       }
     }
