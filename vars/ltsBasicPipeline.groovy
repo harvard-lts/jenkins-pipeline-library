@@ -74,7 +74,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Beginning integration tests step on dev"
           script {
-              buildUtils.runIntegrationTests(intTestEndpoints, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
+              buildUtils.runIntegrationTests('hgl_svcupd', intTestEndpoints, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
           }
       }
     }
@@ -120,7 +120,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Beginning integration tests step on dev"
           script {
-              buildUtils.runIntegrationTests(intTestEndpoints, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
+              buildUtils.runIntegrationTests('hgl_svcupd', intTestEndpoints, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
           }
       }
     }
@@ -168,7 +168,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Beginning integration tests step on QA"
           script {
-              buildUtils.runIntegrationTests(intTestEndpoints, env.QA_SERVER, env.CLOUD_QA, intTestPort)
+              buildUtils.runIntegrationTests('qatest', intTestEndpoints, env.QA_SERVER, env.CLOUD_QA, intTestPort)
           }
       }
     }

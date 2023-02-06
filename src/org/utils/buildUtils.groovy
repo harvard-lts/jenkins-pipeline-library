@@ -45,8 +45,8 @@ def publishQAImage(image_name, git_hash) {
     }
 }
 
-def runIntegrationTests(int_test_endpoints, server, hostname, int_test_port){
-    sshagent(credentials : ['hgl_svcupd']) {
+def runIntegrationTests(agent, int_test_endpoints, server, hostname, int_test_port){
+    sshagent(credentials : [agent]) {
             sleep 60;
             for(int i = 0; i < int_test_endpoints.size(); i++){
                 String endpoint = int_test_endpoints.get(i)
