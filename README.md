@@ -13,10 +13,14 @@ This is a shared library for resuable pipelines
 // projName: The directory name for the project on the servers for it's docker/config files
 // intTestPort: Port of integration test container
 // intTestEndpoints: List of integration test endpoints i.e. ['healthcheck/', 'another/example/']
+// excludeIntTestDev: List of integration test endpoints to exclude being runon Dev
+// excludeIntTestQA: List of integration test endpoints to exclude being run on QA
 // default values: slackChannel = "lts-jenkins-notifications"
 
 def endpoints = []
-ltsBasicPipeline.call("<imageName>", "<stackName>", "<projName>", "<intTestPort>", endpoints, "<slackChannel>") 
+def excludeIntTestDev = []
+def excludeIntTestQA = []
+ltsBasicPipeline.call("<imageName>", "<stackName>", "<projName>", "<intTestPort>", endpoints, , excludeIntTestDev, excludeIntTestQA,"<slackChannel>") 
 ```
 
 #### Docker Compose Pipeline

@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(String imageName, String stackName, String projName, String intTestPort, List intTestEndpoints, String slackChannel = "lts-jenkins-notifications") {
+def call(String imageName, String stackName, String projName, String intTestPort, List intTestEndpoints, List excludeIntTestDev, List excludeIntTestQA, String slackChannel = "lts-jenkins-notifications") {
 
   pipeline {
 
@@ -74,7 +74,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Beginning integration tests step on dev"
           script {
-              buildUtils.runIntegrationTests('hgl_svcupd', intTestEndpoints, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
+              buildUtils.runIntegrationTests('hgl_svcupd', intTestEndpoints, excludeIntTestDev, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
           }
       }
     }
@@ -120,7 +120,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Beginning integration tests step on dev"
           script {
-              buildUtils.runIntegrationTests('hgl_svcupd', intTestEndpoints, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
+              buildUtils.runIntegrationTests('hgl_svcupd', intTestEndpoints, excludeIntTestDev, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
           }
       }
     }
@@ -168,7 +168,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
       steps {
           echo "Beginning integration tests step on QA"
           script {
-              buildUtils.runIntegrationTests('qatest', intTestEndpoints, env.QA_SERVER, env.CLOUD_QA, intTestPort)
+              buildUtils.runIntegrationTests('qatest', intTestEndpoints, excludeIntTestQA, env.QA_SERVER, env.CLOUD_QA, intTestPort)
           }
       }
     }

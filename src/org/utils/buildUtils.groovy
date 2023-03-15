@@ -45,19 +45,21 @@ def publishQAImage(image_name, git_hash) {
     }
 }
 
-def runIntegrationTests(agent, int_test_endpoints, server, hostname, int_test_port){
+def runIntegrationTests(agent, int_test_endpoints, excluded_endpoints, server, hostname, int_test_port){
     sshagent(credentials : [agent]) {
             sleep 60;
             for(int i = 0; i < int_test_endpoints.size(); i++){
                 String endpoint = int_test_endpoints.get(i)
-                TESTS_PASSED = sh (script: "ssh -t -t ${server} 'curl -k https://${hostname}:${int_test_port}/${endpoint}'",
-                returnStdout: true).trim()
-                echo "${TESTS_PASSED}"
-            if (!TESTS_PASSED.contains("\"num_failed\": 0")){
-                error "Integration tests did not pass for endpoint: ${endpoint}"
-            } else {
-                echo "All test passed for endpoint: ${endpoint}!"
+                if (!excluded_endpoints.contains(endpoint)) {
+                    TESTS_PASSED = sh (script: "ssh -t -t ${server} 'curl -k https://${hostname}:${int_test_port}/${endpoint}'",
+                    returnStdout: true).trim()
+                    echo "${TESTS_PASSED}"
+                    if (!TESTS_PASSED.contains("\"num_failed\": 0")){
+                        error "Integration tests did not pass for endpoint: ${endpoint}"
+                    } else {
+                        echo "All test passed for endpoint: ${endpoint}!"
+                    }
+                }
             }
-        }
     }
 }
