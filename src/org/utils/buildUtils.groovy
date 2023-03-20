@@ -47,7 +47,7 @@ def publishQAImage(image_name, git_hash) {
 
 def runIntegrationTests(agent, int_test_endpoints, excluded_endpoints, server, hostname, int_test_port){
     sshagent(credentials : [agent]) {
-            sleep 60;
+            sleep 90;
             for(int i = 0; i < int_test_endpoints.size(); i++){
                 String endpoint = int_test_endpoints.get(i)
                 if (!excluded_endpoints.contains(endpoint)) {
@@ -59,6 +59,7 @@ def runIntegrationTests(agent, int_test_endpoints, excluded_endpoints, server, h
                     } else {
                         echo "All test passed for endpoint: ${endpoint}!"
                     }
+                    sleep 10;
                 }
             }
     }
