@@ -7,7 +7,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
   agent any
   stages {
     stage('Configure') {
-      when { anyOf { branch 'main'; branch 'trial'; buildingTag() } }
+      when { anyOf { branch 'qa'; branch 'trial'; buildingTag() } }
       steps {
         script {
           GIT_TAG = env.BRANCH_NAME
@@ -81,7 +81,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
    stage('Build and Publish dev image') {
       when {
           allOf {
-            branch 'main';
+            branch 'qa';
             not { buildingTag() }
           }
         }
@@ -96,7 +96,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
     stage('MainDevDeploy') {
       when {
           allOf {
-            branch 'main';
+            branch 'qa';
             not { buildingTag() }
           }
         }
@@ -113,7 +113,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
     stage('MainDevIntegrationTest') {
       when {
           allOf {
-            branch 'main';
+            branch 'qa';
             not { buildingTag() }
           }
         }
@@ -127,7 +127,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
     stage('Publish main qa image') {
       when {
            allOf {
-            branch 'main';
+            branchqain';
             not { buildingTag() }
           }
         }
@@ -144,7 +144,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
     stage('MainQADeploy') {
       when {
           allOf {
-            branch 'main';
+            branch 'qa';
             not { buildingTag() }
           }
         }
@@ -161,7 +161,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
     stage('MainQAIntegrationTest') {
       when {
           allOf {
-            branch 'main';
+            branch 'qa';
             not { buildingTag() }
           }
         }
@@ -176,7 +176,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
    post {
         fixed {
             script {
-                if(env.BRANCH_NAME == "main" || env.BRANCH_NAME == "trial") {
+                if(env.BRANCH_NAME == "qa" || env.BRANCH_NAME == "trial") {
                     // Specify your project channel here. Feel free to add/remove states that are relevant to your project (i.e. fixed, failure,...)
                     slackSend channel: "#${slackChannel}", color: "##77caed", message: "Build Fixed: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                 }
@@ -184,7 +184,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         }
         failure {
             script {
-                if(env.BRANCH_NAME == "main" || env.BRANCH_NAME == "trial") {
+                if(env.BRANCH_NAME == "qa" || env.BRANCH_NAME == "trial") {
                     // Specify your project channel here. Feel free to add/remove states that are relevant to your project (i.e. fixed, failure,...)
                     slackSend channel: "#${slackChannel}", color: "danger", message: "Build Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                 }
@@ -192,7 +192,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
         }
         success {
             script {
-                if(env.BRANCH_NAME == "main" || env.BRANCH_NAME == "trial") {
+                if(env.BRANCH_NAME == "qa" || env.BRANCH_NAME == "trial") {
                     // Specify your project channel here. Feel free to add/remove states that are relevant to your project (i.e. fixed, failure,...)
                     slackSend channel: "#${slackChannel}", color: "good", message: "Build Succeeded: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                 }
