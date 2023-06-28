@@ -127,7 +127,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
     stage('Publish main qa image') {
       when {
            allOf {
-            branchqain';
+            branch 'qa';
             not { buildingTag() }
           }
         }
