@@ -205,8 +205,8 @@ def call(String imageName, String stackName, String projName, String intTestPort
     // projName is the directory name for the project on the servers for it's docker/config files
     projName = ''
     slackChannel=''
-    registryCredentialsId = "${env.REGISTRY_ID}"
-    registryUri = 'https://registry.lts.harvard.edu'
+    registryCredentialsId = "${env.ARTIFACTORY_ID}"
+    registryUri = 'https://artifactory.huit.harvard.edu/'
    }
  }
 }
