@@ -9,15 +9,15 @@ def devDockerComposeBuild(git_hash) {
 }
 
 def devDockerComposeTagLatest(image_name, git_hash) {
-    sh("docker pull registry.lts.harvard.edu/lts/${image_name}-dev:${git_hash}")
-    devImage = docker.image("registry.lts.harvard.edu/lts/${image_name}-dev:${git_hash}")
+    sh("docker pull artifactory.huit.harvard.edu/lts/${image_name}-dev:${git_hash}")
+    devImage = docker.image("artifactory.huit.harvard.edu/lts/${image_name}-dev:${git_hash}")
     docker.withRegistry(registryUri, registryCredentialsId){
         devImage.push('latest')
     }
 }
 
 def basicImageBuild(image_name, git_hash, environment) {
-    def image = docker.build("registry.lts.harvard.edu/lts/${image_name}-${environment}:${git_hash}")
+    def image = docker.build("artifactory.huit.harvard.edu/lts/${image_name}-${environment}:${git_hash}")
     docker.withRegistry(registryUri, registryCredentialsId){
       // push the image with hash image
       image.push()
@@ -27,18 +27,18 @@ def basicImageBuild(image_name, git_hash, environment) {
 }
 
 def publishProdImage(image_name, git_hash, git_tag) {
-    sh("docker pull registry.lts.harvard.edu/lts/${image_name}-qa:${git_hash}")
-    sh("docker tag registry.lts.harvard.edu/lts/${image_name}-qa:${git_hash} registry.lts.harvard.edu/lts/${image_name}:${git_tag}")
-    prodImage = docker.image("registry.lts.harvard.edu/lts/${image_name}:${git_tag}")
+    sh("docker pull artifactory.huit.harvard.edu/lts/${image_name}-qa:${git_hash}")
+    sh("docker tag artifactory.huit.harvard.edu/lts/${image_name}-qa:${git_hash} artifactory.huit.harvard.edu/lts/${image_name}:${git_tag}")
+    prodImage = docker.image("artifactory.huit.harvard.edu/lts/${image_name}:${git_tag}")
     docker.withRegistry(registryUri, registryCredentialsId){
         prodImage.push()
     }
 }
 
 def publishQAImage(image_name, git_hash) {
-    sh("docker pull registry.lts.harvard.edu/lts/${image_name}-dev:${git_hash}")
-    sh("docker tag registry.lts.harvard.edu/lts/${image_name}-dev:${git_hash} registry.lts.harvard.edu/lts/${image_name}-qa:${git_hash}")
-    qaImage = docker.image("registry.lts.harvard.edu/lts/${image_name}-qa:${git_hash}")
+    sh("docker pull artifactory.huit.harvard.edu/lts/${image_name}-dev:${git_hash}")
+    sh("docker tag artifactory.huit.harvard.edu/lts/${image_name}-dev:${git_hash} artifactory.huit.harvard.edu/lts/${image_name}-qa:${git_hash}")
+    qaImage = docker.image("artifactory.huit.harvard.edu/lts/${image_name}-qa:${git_hash}")
     docker.withRegistry(registryUri, registryCredentialsId){
         qaImage.push()
         qaImage.push('latest')

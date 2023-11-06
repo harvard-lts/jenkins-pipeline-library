@@ -219,7 +219,7 @@ def call(List imageNames, String stackName, String projName, String intTestPort,
     projName = ''
     slackChannel=''
     registryCredentialsId = "${env.REGISTRY_ID}"
-    registryUri = 'https://registry.lts.harvard.edu'
+    registryUri = 'https://artifactory.huit.harvard.edu'
    }
  }
 }
