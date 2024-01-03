@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(String imageName, String stackName, String projName, String intTestPort, List intTestEndpoints, String slackChannel = "lts-jenkins-notifications") {
+def call(String imageName, String slackChannel = "lts-jenkins-notifications") {
 
   pipeline {
 
@@ -107,9 +107,6 @@ def call(String imageName, String stackName, String projName, String intTestPort
     }
    environment {
     imageName = ''
-    stackName = ''
-    // projName is the directory name for the project on the servers for it's docker/config files
-    projName = ''
     slackChannel=''
     registryCredentialsId = "${env.ARTIFACTORY_ID}"
     registryUri = 'https://artifactory.huit.harvard.edu/'
