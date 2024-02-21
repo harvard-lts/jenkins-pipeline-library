@@ -6,6 +6,10 @@ def devDockerComposeBuild(git_hash) {
         sh("GIT_HASH=${git_hash} docker-compose -f docker-compose-jenkins.yml build --no-cache")
         sh("GIT_HASH=${git_hash} docker-compose -f docker-compose-jenkins.yml push")
     }
+    docker.withRegistry(artUri, artCredentialsId) {
+        sh("GIT_HASH=${git_hash} docker-compose -f docker-compose-jenkins.yml build --no-cache")
+        sh("GIT_HASH=${git_hash} docker-compose -f docker-compose-jenkins.yml push")
+    }
 }
 
 def devDockerComposeTagLatest(image_name, git_hash) {
