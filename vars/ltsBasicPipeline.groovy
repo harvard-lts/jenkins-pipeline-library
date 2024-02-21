@@ -114,7 +114,7 @@ def call(String imageName, String stackName, String projName, String intTestPort
     registryCredentialsId = "${env.REGISTRY_ID}"
     registryUri = 'https://registry.lts.harvard.edu'
     artUri = 'https://artifactory.huit.harvard.edu'
-    artCredentialsId = "{env.ARTIFACTORY_ID}"
+    artCredentialsId = "${env.ARTIFACTORY_ID}"
    }
  }
 }
