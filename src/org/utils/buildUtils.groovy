@@ -2,10 +2,6 @@
 package org.utils
 
 def devDockerComposeBuild(git_hash) {
-    docker.withRegistry(registryUri, registryCredentialsId) {
-        sh("GIT_HASH=${git_hash} docker-compose -f docker-compose-jenkins.yml build --no-cache")
-        sh("GIT_HASH=${git_hash} docker-compose -f docker-compose-jenkins.yml push")
-    }
     docker.withRegistry(artUri, artCredentialsId) {
         sh("GIT_HASH=${git_hash} docker-compose -f docker-compose-jenkins.yml build --no-cache")
         sh("GIT_HASH=${git_hash} docker-compose -f docker-compose-jenkins.yml push")
@@ -13,13 +9,8 @@ def devDockerComposeBuild(git_hash) {
 }
 
 def devDockerComposeTagLatest(image_name, git_hash) {
-    sh("docker pull registry.lts.harvard.edu/lts/${image_name}-dev:${git_hash}")
-    devImage = docker.image("registry.lts.harvard.edu/lts/${image_name}-dev:${git_hash}")
     sh("docker pull artifactory.huit.harvard.edu/lts/${image_name}-dev:${git_hash}")
     devArtImage = docker.image("artifactory.huit.harvard.edu/lts/${image_name}-dev:${git_hash}")
-    docker.withRegistry(registryUri, registryCredentialsId){
-        devImage.push('latest')
-    }
     docker.withRegistry(artUri, artCredentialsId){
         devArtImage.push('latest')
     }
