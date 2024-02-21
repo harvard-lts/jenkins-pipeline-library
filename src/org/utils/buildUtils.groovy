@@ -21,7 +21,7 @@ def devDockerComposeTagLatest(image_name, git_hash) {
         devImage.push('latest')
     }
     docker.withRegistry(artUri, artCredentialsId){
-        devImage.push('latest')
+        devArtImage.push('latest')
     }
 }
 
@@ -37,9 +37,9 @@ def basicImageBuild(image_name, git_hash, environment) {
     echo 'trying to do artifactory'
     docker.withRegistry(artUri, artCredentialsId){
       // push the image with hash image
-      image.push()
+      artImage.push()
       // then tag with latest
-      image.push('latest')
+      artImage.push('latest')
     }
 }
 
