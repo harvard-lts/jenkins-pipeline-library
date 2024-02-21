@@ -34,6 +34,7 @@ def basicImageBuild(image_name, git_hash, environment) {
       // then tag with latest
       image.push('latest')
     }
+    echo 'trying to do artifactory'
     docker.withRegistry(artUri, artCredentialsId){
       // push the image with hash image
       image.push()
