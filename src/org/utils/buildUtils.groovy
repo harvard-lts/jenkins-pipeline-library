@@ -11,14 +11,26 @@ def devDockerComposeBuild(git_hash) {
 def devDockerComposeTagLatest(image_name, git_hash) {
     sh("docker pull registry.lts.harvard.edu/lts/${image_name}-dev:${git_hash}")
     devImage = docker.image("registry.lts.harvard.edu/lts/${image_name}-dev:${git_hash}")
+    sh("docker pull artifactory.huit.harvard.edu/lts/${image_name}-dev:${git_hash}")
+    devArtImage = docker.image("artifactory.huit.harvard.edu/lts/${image_name}-dev:${git_hash}")
     docker.withRegistry(registryUri, registryCredentialsId){
+        devImage.push('latest')
+    }
+    docker.withRegistry(artUri, artCredentialsId){
         devImage.push('latest')
     }
 }
 
 def basicImageBuild(image_name, git_hash, environment) {
     def image = docker.build("registry.lts.harvard.edu/lts/${image_name}-${environment}:${git_hash}")
+    def artImage = docker.build("artifactory.huit.harvard.edu/lts/${image_name}-${environment}:${git_hash}")
     docker.withRegistry(registryUri, registryCredentialsId){
+      // push the image with hash image
+      image.push()
+      // then tag with latest
+      image.push('latest')
+    }
+    docker.withRegistry(artUri, artCredentialsId){
       // push the image with hash image
       image.push()
       // then tag with latest
@@ -33,6 +45,12 @@ def publishProdImage(image_name, git_hash, git_tag) {
     docker.withRegistry(registryUri, registryCredentialsId){
         prodImage.push()
     }
+    sh("docker pull artifactory.huit.harvard.edu/lts/${image_name}-qa:${git_hash}")
+    sh("docker tag artifactory.huit.harvard.edu/lts/${image_name}-qa:${git_hash} artifactory.huit.harvard.edu/lts/${image_name}:${git_tag}")
+    prodArtImage = docker.image("artifactory.huit.harvard.edu/lts/${image_name}:${git_tag}")
+    docker.withRegistry(artUri, artCredentialsId){
+        prodArtImage.push()
+    }
 }
 
 def publishQAImage(image_name, git_hash) {
@@ -42,6 +60,13 @@ def publishQAImage(image_name, git_hash) {
     docker.withRegistry(registryUri, registryCredentialsId){
         qaImage.push()
         qaImage.push('latest')
+    }
+    sh("docker pull artifactory.huit.harvard.edu/lts/${image_name}-dev:${git_hash}")
+    sh("docker tag artifactory.huit.harvard.edu/lts/${image_name}-dev:${git_hash} artifactory.huit.harvard.edu/lts/${image_name}-qa:${git_hash}")
+    qaArtImage = docker.image("artifactory.huit.harvard.edu/lts/${image_name}-qa:${git_hash}")
+    docker.withRegistry(artUri, artCredentialsId){
+        qaArtImage.push()
+        qaArtImage.push('latest')
     }
 }
 
