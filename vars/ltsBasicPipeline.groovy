@@ -47,37 +47,6 @@ def call(String imageName, String stackName, String projName, String intTestPort
         }
       }
    }
-    stage('TrialDevDeploy') {
-      when {
-          allOf {
-            branch 'trial';
-            not { buildingTag() }
-          }
-        }
-      steps {
-          echo "Deploying to dev"
-          script {
-            echo "$GIT_HASH"
-            sshagent(credentials : ['hgl_svcupd']) {
-            sh "ssh -t -t ${env.DEV_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
-            }
-          }
-      }
-    }
-    stage('TrialDevIntegrationTest') {
-      when {
-          allOf {
-            branch 'trial';
-            not { buildingTag() }
-          }
-        }
-      steps {
-          echo "Beginning integration tests step on dev"
-          script {
-              buildUtils.runIntegrationTests('hgl_svcupd', intTestEndpoints, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
-          }
-      }
-    }
    stage('Build and Publish dev image') {
       when {
           allOf {
@@ -91,37 +60,6 @@ def call(String imageName, String stackName, String projName, String intTestPort
             echo "$GIT_HASH"
             buildUtils.basicImageBuild(imageName, GIT_HASH, "dev")
         }
-      }
-    }
-    stage('MainDevDeploy') {
-      when {
-          allOf {
-            branch 'main';
-            not { buildingTag() }
-          }
-        }
-      steps {
-          echo "Deploying to dev"
-          script {
-              echo "$GIT_HASH"
-              sshagent(credentials : ['hgl_svcupd']) {
-              sh "ssh -t -t ${env.DEV_SERVER} '${env.STACK_COMMAND} ${env.HOME}${projName}${env.DOCKER} ${stackName}'"
-              }
-          }
-      }
-    }
-    stage('MainDevIntegrationTest') {
-      when {
-          allOf {
-            branch 'main';
-            not { buildingTag() }
-          }
-        }
-      steps {
-          echo "Beginning integration tests step on dev"
-          script {
-              buildUtils.runIntegrationTests('hgl_svcupd', intTestEndpoints, env.DEV_SERVER, env.CLOUD_DEV, intTestPort)
-          }
       }
     }
     stage('Publish main qa image') {
